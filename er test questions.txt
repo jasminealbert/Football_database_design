@@ -1,0 +1,71 @@
+--testing 
+
+--1. Listing all students who play for a particular department (ie. cohort 4 group)
+SELECT player_name, group_id
+FROM players
+WHERE group_id IN (SELECT group_id FROM groups where group_name ILIKE 'cohort 4');
+
+--2. Listing all fixtures for a specific date (ie. 29th October 2022)
+SELECT matches.match_id, teams.team_name 
+FROM matches INNER JOIN results ON results.match_id = matches.match_id 
+INNER JOIN teams on teams.team_id = results.team_id
+WHERE date = '2022-10-29'
+GROUP BY matches.match_id, teams.team_name;
+
+--3. Listing all players who scored more than 2 goals
+SELECT player_name 
+FROM players
+WHERE consultant_id IN (
+SELECT consultant_id
+FROM goals
+GROUP BY consultant_id
+HAVING COUNT(goal_id)>2);
+
+--4. Return the total number of goals scored in the season
+SELECT COUNT(goal_id)
+FROM goals;
+
+--5. Return the number of goals in favour, goals against, goals difference and points by team
+SELECT team_name, sum(team_goals) AS "goals for", 
+sum(opposition_goals) AS "goals_against", sum(team_goals)-sum(opposition_goals) AS "goal difference",
+sum(points) AS "points"
+FROM results INNER JOIN teams ON results.team_id = teams.team_id
+GROUP BY team_name;
+
+--6. Listing the number of cards (yellow and red) per team
+SELECT teams.team_name,  colours.colour, COUNT(cards.card_id)
+FROM cards INNER JOIN players ON cards.consultant_id = players.consultant_id
+INNER JOIN teams ON teams.team_id = players.team_id
+INNER JOIN colours on colours.colour_id = cards.colour_id
+GROUP BY teams.team_name, colours;
+
+
+--7. Return the games that are going to be played (friendly matches)
+SELECT team_name, date, matches.match_id
+FROM results INNER JOIN teams ON teams.team_id = results.team_id
+INNER JOIN matches ON results.match_id = matches.match_id
+WHERE results.team_goals IS NULL
+GROUP BY matches.match_id, team_name, date;
+
+
+--8. Develop a store procedure to add new players. It needs to consider warnings and exceptions
+
+create procedure insert_player(consultant_id_input INTEGER, player_name VARCHAR, team_id_input INTEGER, group_id_input INTEGER)
+language plpgsql
+as $$
+begin 
+	if consultant_id_input in (SELECT consultant_id FROM players WHERE consultant_id=consultant_id_input) THEN
+	raise notice 'Duplicate consultant ID has been inputted, add new consultant ID';
+	ELSE
+		IF team_id_input NOT IN (SELECT team_id FROM teams) THEN
+		raise notice 'Invalid team ID';
+		ELSE 
+			IF group_id_input NOT IN (SELECT group_id FROM groups) THEN
+			raise notice 'Invalid group ID';
+			
+			ELSE
+			INSERT INTO players VALUES (consultant_id_input, player_name, team_id_input, group_id_input);
+			end if;
+		end if;
+	end if;
+end $$;	
