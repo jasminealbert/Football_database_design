@@ -1,5 +1,5 @@
 # Football Database Design
-## Creating a database of a company's football league's results
+Creating a database of a company's football league's results
 
 ### Table of contents
 - [Scenario](#Scenario)
