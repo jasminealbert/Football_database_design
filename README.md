@@ -36,7 +36,7 @@ From this, many tests were performed using SQL to show the data was inputted cor
 
 ![image](https://user-images.githubusercontent.com/116348107/215108425-b8db7ed5-c00c-4700-a663-511817217a0c.png)
 
-
+All other questions and solutions are available [here](https://github.com/jasminealbert/Football_database_design/blob/main/er%20test%20questions.txt)
 
 [Back To The Top](#Football-Database_Design)
 
